@@ -6,6 +6,12 @@ const expect      = require('chai').expect;
 const cors        = require('cors');
 require('dotenv').config();
 
+const myDB = require('./connection')
+const { ObjectID } = require('mongodb')
+const URI = process.env.MONGO_URI;
+
+
+
 const apiRoutes         = require('./routes/api.js');
 const fccTestingRoutes  = require('./routes/fcctesting.js');
 const runner            = require('./test-runner');
@@ -37,13 +43,24 @@ app.route('/')
 fccTestingRoutes(app);
 
 //Routing for API 
-apiRoutes(app);  
+//apiRoutes(app);  
     
 //404 Not Found Middleware
 app.use(function(req, res, next) {
   res.status(404)
     .type('text')
     .send('Not Found');
+});
+
+myDB(async client => {
+  const myDataBase = await client.db('database').collection('users');
+
+  apiRoutes(app, myDataBase)
+
+}).catch(e => {
+  app.route('/').get((req, res) => {
+    res.render('index', { title: e, message: 'Unable to connect to database' });
+  });
 });
 
 //Start our server and tests!
