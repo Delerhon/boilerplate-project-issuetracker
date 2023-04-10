@@ -13,9 +13,9 @@ async function main(callback) {
         // Connect to the MongoDB cluster
         await client.connect()
         console.log('MongoDB connected'.bgWhite.black);
-
+        const myDataBase = await client.db('IssueTracker').collection('Issues');
         // Make the appropriate DB calls
-        await callback(client);
+        await callback(myDataBase);
 
     } catch (e) {
         // Catch any errors
