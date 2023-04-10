@@ -180,30 +180,83 @@ suite('Functional Tests', function() {
       done(err)
     })
   }) */
-});
 
-test('#50 Update multiple fields on an issue: PUT request to /api/issues/{project}', (done) => {
-  Promise.all([
-    chai.request(server).post(`/api/issues/apitest?_id=test50&issue_title=Dertest&issue_text=Wirhabenvielvor&created_by=chaiTest`)
 
-  ]).then(() => {
+  /* test('#50 Update multiple fields on an issue: PUT request to /api/issues/{project}', (done) => {
+    Promise.all([
+      chai.request(server).post(`/api/issues/apitest?_id=test50&issue_title=Dertest&issue_text=Wirhabenvielvor&created_by=chaiTest`)
 
-    chai
-      .request(server)
-      .put(`/api/issues/apitest?_id=test50&issue_text=Wirhab&created_by=NewUser`)
-      .end((err, res) => {
-        assert.equal(res.status, 202);
-        Promise.all([
-          chai.request(server).delete('/api/issues/apitest?_id=test50')
-        ]).then(
-          done()
-        ).catch((err) => {
-          console.log(err);
-          done(err)
+    ]).then(() => {
+
+      chai
+        .request(server)
+        .put(`/api/issues/apitest?_id=test50&issue_text=Wirhab&created_by=NewUser`)
+        .end((err, res) => {
+          assert.equal(res.status, 202);
+          Promise.all([
+            chai.request(server).delete('/api/issues/apitest?_id=test50')
+          ]).then(
+            done()
+          ).catch((err) => {
+            console.log(err);
+            done(err)
+          })
         })
-      })
-  }).catch((err) => {
-    console.log(err);
-    done(err)
+    }).catch((err) => {
+      console.log(err);
+      done(err)
+    })
+  }) */
+
+  /* test('#60 Update an issue with missing _id: PUT request to /api/issues/{project}', (done) => {
+    Promise.all([
+      chai.request(server).post(`/api/issues/apitest?_id=test60&issue_title=Dertest&issue_text=Wirhabenvielvor&created_by=chaiTest`)
+    ]).then(() => {
+
+      chai
+        .request(server)
+        .put(`/api/issues/apitest?issue_text=Wirhab&created_by=NewUser`)
+        .end((err, res) => {
+          assert.equal(res.status, 410);
+          Promise.all([
+            chai.request(server).delete('/api/issues/apitest?_id=test60')
+          ]).then(
+            done()
+          ).catch((err) => {
+            console.log(err);
+            done(err)
+          })
+        })
+    }).catch((err) => {
+      console.log(err);
+      done(err)
+    })
+  }) */
+
+  test('#70   Update an issue with no fields to update: PUT request to /api/issues/{project}', (done) => {
+    Promise.all([
+      chai.request(server).post(`/api/issues/apitest?_id=test70&issue_title=Dertest&issue_text=Wirhabenvielvor&created_by=chaiTest`)
+    ]).then(() => {
+
+      chai
+        .request(server)
+        .put(`/api/issues/apitest?_id=test70`)
+        .end((err, res) => {
+          assert.equal(res.status, 420);
+          Promise.all([
+            chai.request(server).delete('/api/issues/apitest?_id=test70')
+          ]).then(
+            done()
+          ).catch((err) => {
+            console.log(err);
+            done(err)
+          })
+        })
+    }).catch((err) => {
+      console.log(err);
+      done(err)
+    })
   })
+
+// end of Suite()
 })
