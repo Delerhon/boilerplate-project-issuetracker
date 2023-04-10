@@ -5,25 +5,37 @@ const bodyParser  = require('body-parser');
 const expect      = require('chai').expect;
 const cors        = require('cors');
 require('dotenv').config();
+const mongoose = require('mongoose')
 
-const myDB = require('./connection')
-const { ObjectID } = require('mongodb')
-const URI = process.env.MONGO_URI;
-
-
+const myDB = require('./MongoDB/connection')
 
 const apiRoutes         = require('./routes/api.js');
 const fccTestingRoutes  = require('./routes/fcctesting.js');
 const runner            = require('./test-runner');
 
-let app = express();
+const app = express();
+
+mongoose.connect(process.env.MONGO_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function() {
+  console.log('Connected to database');
+});
+
 
 app.use('/public', express.static(process.cwd() + '/public'));
 
 app.use(cors({origin: '*'})); //For FCC testing purposes only
 
 
-
+app.use((req, res, next) => {
+  console.log(' '.repeat(10) + `${req.method} ${req.url}`)
+  next()
+})
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -43,8 +55,10 @@ app.route('/')
 fccTestingRoutes(app);
 
 //Routing for API 
-//apiRoutes(app);  
+apiRoutes(app);  
     
+
+
 //404 Not Found Middleware
 app.use(function(req, res, next) {
   res.status(404)
@@ -52,16 +66,7 @@ app.use(function(req, res, next) {
     .send('Not Found');
 });
 
-myDB(async client => {
-  const myDataBase = await client.db('database').collection('users');
 
-  apiRoutes(app, myDataBase)
-
-}).catch(e => {
-  app.route('/').get((req, res) => {
-    res.render('index', { title: e, message: 'Unable to connect to database' });
-  });
-});
 
 //Start our server and tests!
 const listener = app.listen(process.env.PORT || 3000, function () {
