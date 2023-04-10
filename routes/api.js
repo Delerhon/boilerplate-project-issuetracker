@@ -1,4 +1,6 @@
 'use strict';
+const { logError, logAndSendError } = require('../ErrorHandler/logError');
+
 const Issue = require('../MongoDB/schemas.js');
 const mongodb = require('mongodb');
 const express = require('express')
@@ -11,6 +13,11 @@ const ObjectID = mongoose.Types.ObjectId
 
 const getKeyLength = (obj) => Object.keys(obj).length;
 const getKey = (obj, index) => Object.keys(obj)[index]
+
+const logDuration = (startingTime) => {
+  const duration = (Date.now() - startingTime) / 1_000
+  console.log(' '.repeat(10) + `${duration}`.bgYellow.black)
+}
 
 module.exports = (app, myDataBase) => {
 
@@ -40,6 +47,7 @@ module.exports = (app, myDataBase) => {
   // ///////////////////////////////////////////////////////////////////////  POST
 
     .post(async function (req, res){
+      const timer = Date.now()
       let project = req.params.project;
       const query = req.query
       const newIssue = new Issue({
@@ -56,21 +64,23 @@ module.exports = (app, myDataBase) => {
       } catch(err) {
         console.log(' '.repeat(10) + 'Invalid issue data'.bgRed.black)
         res.status(400).send('Invalid issue data')
+        logDuration(timer)
         return
       }
         
         newIssue.save({ validateBeforeSave: false })
         .then(savedIssue => {
           if (savedIssue.errors) {
-            console.log(' '.repeat(10) + 'Issue created')
+            console.log(' '.repeat(10) + 'Issue not created'.bgRed.black)
             res.status(400).send('Invalid issue data');
             return;
           }  
           res.status(201).send('Issue created successfully');
+          logDuration(timer)
         })
         .catch((error) => {
-          console.log('Error on saving'.bgRed.black)
-          res.status(400).send('Error on saving')
+          console.log(' '.repeat(10) + '400 Error on saving'.bgRed.black)
+          res.status(400).send('400 Error on saving')
     })
       
     })
@@ -78,6 +88,7 @@ module.exports = (app, myDataBase) => {
   // ///////////////////////////////////////////////////////////////////////  PUT
 
     .put(async function (req, res){
+      const timer = Date.now()
       let project = req.params.project;
       const issueID = req.query._id
       const updatePack = {}
@@ -88,24 +99,39 @@ module.exports = (app, myDataBase) => {
           }
         } 
       }
+
+      if (getKeyLength(req.query) === 1) {
+        for (const key in req.query) {
+          if (req.query[key] == '_id') {
+            
+          }
+        }
+      }
       
       if (Object.keys(updatePack).length === 0) { 
-        console.log('no fields to update'.bgRed.black);
-        res.status(400).send('no fields to update')
+        logAndSendError(420, 'no fields to update', res)
+        /* console.log(' '.repeat(10) + '420 no fields to update'.bgRed.black);
+        res.status(420).send('420 no fields to update'.bgRed.black) */
+        return
       }
-
       updatePack.updated_on = Date.now()
-      try {
-        const updateFeedback = await Issue.findOneAndUpdate({ _id: issueID}, updatePack, {new: true})
-        if (updateFeedback) {
-          res.status(202).send('Issue updated successfully');
-        } else {
-          console.log('no match for update'.bgRed.black);
-          res.status(400).send('no match for update')
+
+      if (!issueID) {
+        console.log(' '.repeat(10) + 'onUpdate: _id is missing'.bgRed.black)
+        res.status(410).send('onUpdate: _id is missing')
+      }else {
+        try {
+          const updateFeedback = await Issue.findOneAndUpdate({ _id: issueID}, updatePack, {new: true})
+          if (updateFeedback) {
+            res.status(202).send('Issue updated successfully');
+          } else {
+            console.log(' '.repeat(10) + 'no match for update'.bgRed.black);
+            res.status(401).send('no match for update')
+          }
+        } catch (error) {
+          console.log(' '.repeat(10) + 'error on update'.bgRed.black);
+          res.status(400).send('unexpected error on update')
         }
-      } catch (error) {
-        console.log('error on update'.bgRed.black);
-        res.status(400).send('error on update')
       }
     })
     
@@ -114,16 +140,20 @@ module.exports = (app, myDataBase) => {
     .delete(async function (req, res){
       let project = req.params.project;
       
-      Issue.deleteOne({ _id: req.query._id  })
-      .then( (deletedIssue) => {
-         if (deletedIssue.acknowledged === true) { 
-          res.status.acknowledged = deletedIssue.acknowledged
-          res.send()
-          return
+      try {
+      const deleteFeedback = await Issue.deleteOne({ _id: req.query._id  })
+         if (deleteFeedback.deletedCount === 0) {
+          logAndSendError(400, 'error: issue with requested _id was not found')
+/*        console.log(' '.repeat(10) + 'error: issue with requested _id was not found'.bgRed.black);
+          res.status(400).send('error: issue with requested _id was not found') */
+        } else { 
+          console.log(' '.repeat(10) + 'successfull deleted'.bgGreen.white);
+          res.status(200).send('successfull deleted')
         }
-         console.log(`Error: ` + deletedIssue)
-         
-      });
+      } catch(error) {
+          console.log(' '.repeat(10) + `couldn't delete Issue`)
+          res.status(400).send('unknown error: issue could not deleted' )
+        };
     })
     
 };
