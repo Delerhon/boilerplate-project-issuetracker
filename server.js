@@ -1,4 +1,5 @@
 'use strict';
+const { logError, logAndSendError } = require('./ErrorHandler/logError.js');
 
 const express     = require('express');
 const bodyParser  = require('body-parser');
