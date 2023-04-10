@@ -1,8 +1,7 @@
 const mongoose = require('mongoose');
+const { Schema } = mongoose
 
-const Schema = mongoose.Schema
-
-const Issue = new Schema({
+const issueSchema = new Schema({
     _id: {
         required: true,
         type: String
@@ -41,15 +40,15 @@ const Issue = new Schema({
 {
     query: {
         byID(id) {
-            return this.where({ _id: id })
+            return this.where({ _id: id }).sort('_id')
         }
     }
 }
 )
 
-module.exports = {
-    Issue
-}
+
+
+module.exports = mongoose.model('Issue', issueSchema)
 
 /*
 
