@@ -35,13 +35,10 @@ module.exports = (app, myDataBase) => {
       }
       try {
         foundIssues = await Issue.find(filter)
+        res.json(foundIssues)
       } catch (error) {
-        console.log('unknown error'.bgRed.black);
-        res.status(400).send('unknown error')
-        return
+        logAndSendError(400, 'onFind: unknown error', res)
       }
-
-      res.json(foundIssues)
     })
 
   // ///////////////////////////////////////////////////////////////////////  POST
@@ -62,25 +59,19 @@ module.exports = (app, myDataBase) => {
       try {
       await newIssue.validate()
       } catch(err) {
-        console.log(' '.repeat(10) + 'Invalid issue data'.bgRed.black)
-        res.status(400).send('Invalid issue data')
-        logDuration(timer)
+        logAndSendError(400, 'Invalid issue data', res)
         return
       }
         
         newIssue.save({ validateBeforeSave: false })
         .then(savedIssue => {
           if (savedIssue.errors) {
-            console.log(' '.repeat(10) + 'Issue not created'.bgRed.black)
-            res.status(400).send('Invalid issue data');
-            return;
+            logAndSendError(400, 'Invalid issue data', res)
           }  
           res.status(201).send('Issue created successfully');
-          logDuration(timer)
         })
         .catch((error) => {
-          console.log(' '.repeat(10) + '400 Error on saving'.bgRed.black)
-          res.status(400).send('400 Error on saving')
+          logAndSendError(400, 'Error on saving', res)
     })
       
     })
@@ -110,27 +101,22 @@ module.exports = (app, myDataBase) => {
       
       if (Object.keys(updatePack).length === 0) { 
         logAndSendError(420, 'no fields to update', res)
-        /* console.log(' '.repeat(10) + '420 no fields to update'.bgRed.black);
-        res.status(420).send('420 no fields to update'.bgRed.black) */
         return
       }
       updatePack.updated_on = Date.now()
 
       if (!issueID) {
-        console.log(' '.repeat(10) + 'onUpdate: _id is missing'.bgRed.black)
-        res.status(410).send('onUpdate: _id is missing')
+        logAndSendError(410, 'onUpdate: _id is missing', res)
       }else {
         try {
           const updateFeedback = await Issue.findOneAndUpdate({ _id: issueID}, updatePack, {new: true})
           if (updateFeedback) {
             res.status(202).send('Issue updated successfully');
           } else {
-            console.log(' '.repeat(10) + 'no match for update'.bgRed.black);
-            res.status(401).send('no match for update')
+            logAndSendError(401, 'no match for update', res)
           }
         } catch (error) {
-          console.log(' '.repeat(10) + 'error on update'.bgRed.black);
-          res.status(400).send('unexpected error on update')
+          logAndSendError(400, 'error on update', res)
         }
       }
     })
@@ -140,17 +126,21 @@ module.exports = (app, myDataBase) => {
     .delete(async function (req, res){
       let project = req.params.project;
       
+      if (!req.query._id) {
+        logAndSendError(402, 'error: missing _id', res)
+        return
+      }
+
       try {
       const deleteFeedback = await Issue.deleteOne({ _id: req.query._id  })
          if (deleteFeedback.deletedCount === 0) {
-          logAndSendError(400, 'error: issue with requested _id was not found')
-/*        console.log(' '.repeat(10) + 'error: issue with requested _id was not found'.bgRed.black);
-          res.status(400).send('error: issue with requested _id was not found') */
+          logAndSendError(401, 'error: issue with requested _id was not found', res)
         } else { 
           console.log(' '.repeat(10) + 'successfull deleted'.bgGreen.white);
           res.status(200).send('successfull deleted')
         }
       } catch(error) {
+        logAndSendError(400, 'unknown error: issue could not deleted', res)
           console.log(' '.repeat(10) + `couldn't delete Issue`)
           res.status(400).send('unknown error: issue could not deleted' )
         };
