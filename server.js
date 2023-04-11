@@ -33,13 +33,17 @@ app.use('/public', express.static(process.cwd() + '/public'));
 app.use(cors({origin: '*'})); //For FCC testing purposes only
 
 
-app.use((req, res, next) => {
-  console.log(' '.repeat(10) + `${req.method} ${req.url}`)
-  next()
-})
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use((req, res, next) => {
+  console.log(' '.repeat(10) + `${req.method} ${req.url}`)
+  console.log(req.body)
+  console.log(req.query)
+  console.log(req.params)
 
+  next()
+})
 //Sample front-end
 app.route('/:project/')
   .get(function (req, res) {
