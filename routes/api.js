@@ -59,7 +59,8 @@ module.exports = (app, myDataBase) => {
             res.body = createIssueForPostResponse(savedIssue)
             res.status(201). send(res.body);
           } catch(error) {
-            logAndSendError(400, `error: 'required field(s) missing'`, res)
+            const err = { error: 'required field(s) missing' }
+            logAndSendError(400, 'required field(s) missing', res, err)
 
           }
         
@@ -102,7 +103,8 @@ module.exports = (app, myDataBase) => {
       .delete(async function (req, res){
         let project = req.params.project;
         if (!req.body._id && !req.body.message) {
-          logAndSendError(404, 'error: missing _id', res)
+          const error = { error: 'missing _id' }
+          logAndSendError(404, 'error: missing _id', res, error)
           return
         }
         if(req.body.message == 'delete all') {
@@ -147,7 +149,7 @@ const deleteOne = async (req, res) => {
   try {
     const deleteFeedback = await Issue.deleteOne({ _id: req.body._id });
     if (deleteFeedback.deletedCount === 0) {
-      const error = { error: 'could not delete', '_id': _id }
+      const error = { error: 'could not delete', _id: req.body._id }
       logAndSendError(401, 'error: issue with requested _id was not found', res,  error);
     } else {
       console.log(' '.repeat(10) + 'successfull deleted'.bgGreen.white);
@@ -158,11 +160,11 @@ const deleteOne = async (req, res) => {
       res.status(200).send(deleteResponse);
     }
   } catch (error) {
+    const err = {error: 'could not delete', _id: req.body._id}
     if (!!error.message.match(/Cast to ObjectId/)) {
-      logAndSendError(401, 'error: issue with requested _id was not found', res,{ error: 'missing _id' })
+      logAndSendError(401, 'error: issue with requested _id was not found', res, err)
     } else {
-      const error = { error: 'could not delete', '_id': _id }
-      logAndSendError(400, 'unknown error: issue could not deleted', res, error);
+      logAndSendError(400, 'unknown error: issue could not deleted', res, err);
     }
   };
 };
@@ -201,7 +203,8 @@ function createNewIssue(body) {
     issue_text: body.issue_text,
     assigned_to: body.assigned_to,
     status_text: body.status_text,
-    created_by: body.created_by
+    created_by: body.created_by,
+    open: body.open
   });
 }
 
@@ -231,10 +234,11 @@ async function updateOne(issueID, updatePack, res) {
       logAndSendError(401, 'no match for update', res);
     }
   } catch (error) {
+    const err = { error: 'could not update', _id: issueID}
     if (!!error.message.match(/Cast to ObjectId/)) {
-      logAndSendError(402, error.message, res)
+      logAndSendError(402, error.message, res, err)
     }else {
-      logAndSendError(400, 'error on update', res, { error: 'could not update', _id: issueID });
+      logAndSendError(400, 'unknown error on update', res, err);
     }
   }
 }
