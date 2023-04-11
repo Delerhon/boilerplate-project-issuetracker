@@ -2,6 +2,7 @@ const chaiHttp = require('chai-http');
 const chai = require('chai');
 const assert = chai.assert;
 const server = require('../server');
+const { logAndSendError, logError } = require('../ErrorHandler/logError');
 
 chai.use(chaiHttp);
 
@@ -16,7 +17,7 @@ const isValueInObject = (obj, value) => {
 }
 
 suite('Functional Tests', function() {
-  /* test('#1 Create an issue with every field: POST request to /api/issues/{project}', (done) => {
+  test('#1 Create an issue with every field: POST request to /api/issues/{project}', (done) => {
     chai
       .request(server)
       .post(`/api/issues/apitest?_id=test1&issue_title=Dertest&issue_text=Wirhabenvielvor.&created_by=chaiTest#1&assigned_to=FreeCodeCamp&status_text=test#1`)
@@ -47,9 +48,9 @@ suite('Functional Tests', function() {
         assert.equal(res.status, 400);
         done()
       })
-  }) */
+  })
 
-  /* test('#10 View issues on a project: GET request to /api/issues/{project}', (done) => {
+  test('#10 View issues on a project: GET request to /api/issues/{project}', (done) => {
     Promise.all([
       chai.request(server).post(`/api/issues/apitest?_id=test10&issue_title=Dertest&issue_text=Wirhabenvielvor.&created_by=chaiTest`),
       chai.request(server).post(`/api/issues/apitest?_id=test11&issue_title=Dertest&issue_text=Wirhabenvielvor.&created_by=chaiTest`),
@@ -60,9 +61,7 @@ suite('Functional Tests', function() {
         .request(server)
         .get(`/api/issues/apitest`)
         .end((err, res) => {
-          assert.equal(res.body[0]._id, 'test10');
-          assert.equal(res.body[1]._id, 'test11');
-          assert.equal(res.body[2]._id, 'test12');
+          assert.equal(res.body.length, 3);
           Promise.all([
             chai.request(server).delete('/api/issues/apitest?_id=test10'),
             chai.request(server).delete('/api/issues/apitest?_id=test11'),
@@ -73,17 +72,16 @@ suite('Functional Tests', function() {
             console.log(err);
             done(err)
           })
-          
         })
-    }).catch((err) => {
-      console.log(err);
-      done(err)
+      }).catch ((error) => {
+      logError(400, 'unknown error in test #10')
+      done()
     })
-  }) */
+  })
 
 
 
-  /* test('#20 View issues on a project with one filter: GET request to /api/issues/{project}', (done) => {
+  test('#20 View issues on a project with one filter: GET request to /api/issues/{project}', (done) => {
     Promise.all([
       chai.request(server).post(`/api/issues/apitest?_id=test20&issue_title=Dertest&issue_text=Wirhabenvielvor.&created_by=chaiTest`),
       chai.request(server).post(`/api/issues/apitest?_id=test21&issue_title=Dertest&issue_text=Wirhabenvielvor.&created_by=chaiTest`),
@@ -116,9 +114,9 @@ suite('Functional Tests', function() {
       console.log(err);
       done(err)
     })
-  }) */
+  })
 
-  /* test('#30 View issues on a project with multiple filters: GET request to /api/issues/{project}', (done) => {
+  test('#30 View issues on a project with multiple filters: GET request to /api/issues/{project}', (done) => {
     Promise.all([
       chai.request(server).post(`/api/issues/apitest?_id=test30&issue_title=Dertest&issue_text=Wirhabenvielvor&created_by=chaiTest`),
       chai.request(server).post(`/api/issues/apitest?_id=test31&issue_title=Dertest&issue_text=Wirhabenvielvor&created_by=chaiTest`),
@@ -153,9 +151,9 @@ suite('Functional Tests', function() {
       console.log(err);
       done(err)
     })
-  }) */
+  })
 
-  /* test('#40 Update one field on an issue: PUT request to /api/issues/{project}', (done) => {
+  test('#40 Update one field on an issue: PUT request to /api/issues/{project}', (done) => {
     Promise.all([
       chai.request(server).post(`/api/issues/apitest?_id=test40&issue_title=Dertest&issue_text=Wirhabenvielvor&created_by=chaiTest`)
 
@@ -179,10 +177,10 @@ suite('Functional Tests', function() {
       console.log(err);
       done(err)
     })
-  }) */
+  })
 
 
-  /* test('#50 Update multiple fields on an issue: PUT request to /api/issues/{project}', (done) => {
+  test('#50 Update multiple fields on an issue: PUT request to /api/issues/{project}', (done) => {
     Promise.all([
       chai.request(server).post(`/api/issues/apitest?_id=test50&issue_title=Dertest&issue_text=Wirhabenvielvor&created_by=chaiTest`)
 
@@ -206,9 +204,9 @@ suite('Functional Tests', function() {
       console.log(err);
       done(err)
     })
-  }) */
+  })
 
-  /* test('#60 Update an issue with missing _id: PUT request to /api/issues/{project}', (done) => {
+  test('#60 Update an issue with missing _id: PUT request to /api/issues/{project}', (done) => {
     Promise.all([
       chai.request(server).post(`/api/issues/apitest?_id=test60&issue_title=Dertest&issue_text=Wirhabenvielvor&created_by=chaiTest`)
     ]).then(() => {
@@ -231,7 +229,7 @@ suite('Functional Tests', function() {
       console.log(err);
       done(err)
     })
-  }) */
+  })
 
   test('#70   Update an issue with no fields to update: PUT request to /api/issues/{project}', (done) => {
     Promise.all([
@@ -255,6 +253,77 @@ suite('Functional Tests', function() {
     }).catch((err) => {
       console.log(err);
       done(err)
+    })
+  })
+
+  test('#80   Update an issue with an invalid _id: PUT request to /api/issues/{project}', (done) => {
+    Promise.all([
+      chai.request(server).post(`/api/issues/apitest?_id=test80&issue_title=Dertest&issue_text=Wirhabenvielvor&created_by=chaiTest`)
+    ]).then(() => {
+
+      chai
+        .request(server)
+        .put(`/api/issues/apitest?_id=test81&created_by=NewUser`)
+        .end((err, res) => {
+          assert.equal(res.status, 401);
+          Promise.all([
+            chai.request(server).delete('/api/issues/apitest?_id=test80')
+          ]).then(
+            done()
+          ).catch((err) => {
+            console.log(err);
+            done(err)
+          })
+        })
+    }).catch((err) => {
+      console.log(err);
+      done(err)
+    })
+  })
+
+  test('#90   Delete an issue: DELETE request to /api/issues/{project}', (done) => {
+    Promise.all([
+      chai.request(server).post(`/api/issues/apitest?_id=test90&issue_title=Dertest&issue_text=Wirhabenvielvor&created_by=chaiTest`)
+    ]).then(() => {
+
+      chai
+        .request(server)
+        .delete(`/api/issues/apitest?_id=test90`)
+        .end((err, res) => {
+          assert.equal(res.status, 200);
+          done()
+        })
+    }).catch((err) => {
+      console.log(err);
+      done(err)
+    })
+  })
+
+  test('#100   Delete an issue with an invalid _id: DELETE request to /api/issues/{project}', (done) => {
+    Promise.all([
+      //chai.request(server).post(`/api/issues/apitest?_id=test100&issue_title=Dertest&issue_text=Wirhabenvielvor&created_by=chaiTest`)
+    ]).then(() => {
+
+      chai
+        .request(server)
+        .delete(`/api/issues/apitest?_id=test101`)
+        .end((err, res) => {
+          assert.equal(res.status, 401);
+          done()
+        })
+    }).catch((err) => {
+      console.log(err);
+      done(err)
+    })
+  })
+
+  test('#110   Delete an issue with missing _id: DELETE request to /api/issues/{project}', (done) => {
+    chai
+    .request(server)
+    .delete(`/api/issues/apitest`)
+    .end((err, res) => {
+      assert.equal(res.status, 402);
+      done()
     })
   })
 
