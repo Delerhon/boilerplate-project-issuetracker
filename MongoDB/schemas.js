@@ -18,21 +18,24 @@ const issueSchema = new Schema({
         default: mongoose.now()
     },
     updated_on: {
-        type: Date
+        type: Date,
+        default: mongoose.now()
     },
     created_by: {
         type: String,
         required: true
     },
     assigned_to: {
-        type: String
+        type: String,
+        default: ''
     },
     open: {
         type: Boolean,
         default: true
     },
     status_text: {
-        type: String
+        type: String,
+        default: ''
     }
 },
 {

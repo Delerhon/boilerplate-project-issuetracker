@@ -46,16 +46,7 @@ module.exports = (app, myDataBase) => {
         const timer = Date.now()
         let project = req.params.project;
         const body = req.body
-        const newIssue = new Issue({
-          issue_title: body.issue_title,
-          issue_text: body.issue_text,
-          assigned_to: body.assigned_to,
-          status_text: body.status_text,
-          created_by: body.created_by
-        })
-
-        try {
-          //await newIssue.validate()
+        const newIssue = createNewIssue(body)
 
           try {
             const savedIssue = await newIssue.save()
@@ -63,16 +54,12 @@ module.exports = (app, myDataBase) => {
               logAndSendError(401, 'Invalid issue data', res)
               return
             }
-            res.body = { _id: savedIssue._id }  
+            res.body = createIssueForPostResponse(savedIssue)
             res.status(201). send(res.body);
           } catch(error) {
             logAndSendError(400, 'Error on saving', res, error.message)
 
           }
-        } catch(err) {
-          logAndSendError(402, 'Invalid issue data', res, err)
-          return
-        }
         
       })
     
@@ -143,7 +130,11 @@ const deleteOne = async (req, res) => {
       logAndSendError(401, 'error: issue with requested _id was not found', res);
     } else {
       console.log(' '.repeat(10) + 'successfull deleted'.bgGreen.white);
-      res.status(200).send('successfull deleted');
+      const deleteResponse = {
+        result: 'successfully deleted',
+        _id: req.body._id
+      }
+      res.status(200).send(deleteResponse);
     }
   } catch (error) {
     if (!!error.message.match(/Cast to ObjectId/)) {
@@ -155,6 +146,30 @@ const deleteOne = async (req, res) => {
 };
 
 
+
+function createIssueForPostResponse(savedIssue) {
+  return {
+    assigned_to: savedIssue.assigned_to,
+    status_text: savedIssue.status_text,
+    open: savedIssue.open,
+    _id: savedIssue._id,
+    issue_title: savedIssue.issue_title,
+    issue_text: savedIssue.issue_text,
+    created_by: savedIssue.created_by,
+    created_on: savedIssue.created_on,
+    updated_on: savedIssue.updated_on
+  };
+}
+
+function createNewIssue(body) {
+  return new Issue({
+    issue_title: body.issue_title,
+    issue_text: body.issue_text,
+    assigned_to: body.assigned_to,
+    status_text: body.status_text,
+    created_by: body.created_by
+  });
+}
 
 function createFilter(req) {
   const updatePack = {}
@@ -173,7 +188,11 @@ async function updateOne(issueID, updatePack, res) {
   try {
     const updateFeedback = await Issue.findOneAndUpdate({ _id: issueID }, updatePack, { new: true });
     if (updateFeedback) {
-      res.status(202).send('Issue updated successfully');
+      const updateResponse = {
+        result: 'successfully updated',
+        _id: updateFeedback.id
+      }
+      res.status(202).send(updateResponse);
     } else {
       logAndSendError(401, 'no match for update', res);
     }
