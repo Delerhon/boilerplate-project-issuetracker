@@ -27,17 +27,19 @@ module.exports = (app, myDataBase) => {
         let project = req.params.project;
         let foundIssues
         const filter = {}
-        if (getKeyLength(req.body) > 0) {
-          for (const key in req.body) {
-            filter[key] = req.body[key]
-          } 
+
+        if (getKeyLength(req.query) > 0) {
+          for (const key in req.query) {
+            filter[key] = req.query[key];        
+          }
+        } else {
+          if (getKeyLength(req.body) > 0) {
+            for (const key in req.body) {
+              filter[key] = req.body[key]
+            } 
+          }
         }
-        try {
-          foundIssues = await Issue.find(filter)
-          res.json(foundIssues)
-        } catch (error) {
-          logAndSendError(400, 'onFind: unknown error', res)
-        }
+        foundIssues = await find(foundIssues, filter, res);
       })
 
     // ///////////////////////////////////////////////////////////////////////  POST
@@ -57,7 +59,7 @@ module.exports = (app, myDataBase) => {
             res.body = createIssueForPostResponse(savedIssue)
             res.status(201). send(res.body);
           } catch(error) {
-            logAndSendError(400, 'Error on saving', res, error.message)
+            logAndSendError(400, `error: 'required field(s) missing'`, res)
 
           }
         
@@ -80,13 +82,14 @@ module.exports = (app, myDataBase) => {
         }  */
         
         if (Object.keys(updatePack).length === 0) { 
-          logAndSendError(420, 'no fields to update', res)
+          const error = {error: 'no update field(s) sent', '_id': req.body._id }
+          logAndSendError(420, 'no update field(s) sent', res, error)
           return
         }
         updatePack.updated_on = Date.now()
 
         if (!issueID) {
-          logAndSendError(410, 'onUpdate: _id is missing', res)
+          logAndSendError(410, 'missing _id', res, { error: 'missing _id' })
           return
         }
 
@@ -106,6 +109,10 @@ module.exports = (app, myDataBase) => {
           await deleteAllTest(req, res);
           return
         }
+        if (req.body.message == 'delete all issues, i know what i am doing') {
+          deleteAll(req, res)
+          return
+        }
         await deleteOne(req, res);
       })
 };
@@ -123,11 +130,25 @@ const deleteAllTest = async (req, res) => {
   }
 };
 
+const deleteAll = async (req, res) => {
+  try {
+    const deleteFeedback = await Issue.deleteMany({issue_title: /\w/i });
+    if (deleteFeedback.deletedCount === 0) {
+      logAndSendError(402, 'error: no issue was deletd', res);
+    } else {
+      res.status(200).send('successfull deleted all, really all!!!');
+    }
+  } catch (error) {
+    logAndSendError(403, 'unexpected error onDeleteAll', res);
+  }
+};
+
 const deleteOne = async (req, res) => {
   try {
     const deleteFeedback = await Issue.deleteOne({ _id: req.body._id });
     if (deleteFeedback.deletedCount === 0) {
-      logAndSendError(401, 'error: issue with requested _id was not found', res);
+      const error = { error: 'could not delete', '_id': _id }
+      logAndSendError(401, 'error: issue with requested _id was not found', res,  error);
     } else {
       console.log(' '.repeat(10) + 'successfull deleted'.bgGreen.white);
       const deleteResponse = {
@@ -138,12 +159,25 @@ const deleteOne = async (req, res) => {
     }
   } catch (error) {
     if (!!error.message.match(/Cast to ObjectId/)) {
-      logAndSendError(401, 'error: issue with requested _id was not found', res)
+      logAndSendError(401, 'error: issue with requested _id was not found', res,{ error: 'missing _id' })
     } else {
-      logAndSendError(400, 'unknown error: issue could not deleted', res);
+      const error = { error: 'could not delete', '_id': _id }
+      logAndSendError(400, 'unknown error: issue could not deleted', res, error);
     }
   };
 };
+
+
+
+async function find(foundIssues, filter, res) {
+  try {
+    foundIssues = await Issue.find(filter);
+    res.json(foundIssues);
+  } catch (error) {
+    logAndSendError(400, 'onFind: unknown error', res);
+  }
+  return foundIssues;
+}
 
 
 
@@ -200,7 +234,7 @@ async function updateOne(issueID, updatePack, res) {
     if (!!error.message.match(/Cast to ObjectId/)) {
       logAndSendError(402, error.message, res)
     }else {
-      logAndSendError(400, 'error on update', res);
+      logAndSendError(400, 'error on update', res, { error: 'could not update', _id: issueID });
     }
   }
 }
