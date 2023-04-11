@@ -1,14 +1,12 @@
+const { ObjectId } = require('mongodb');
 const mongoose = require('mongoose');
 const { Schema } = mongoose
 
 const issueSchema = new Schema({
-    _id: {
-        required: true,
-        type: String
-    },
     issue_title: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     issue_text: {
         type: String,
