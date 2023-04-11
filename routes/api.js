@@ -57,9 +57,9 @@ module.exports = (app, myDataBase) => {
               return
             }
             res.body = createIssueForPostResponse(savedIssue)
-            res.status(201). send(res.body);
+            res.status(201).send(res.body);
           } catch(error) {
-            const err = { error: 'required field(s) missing' }
+            const err = `error: 'required field(s) missing'`
             logAndSendError(400, 'required field(s) missing', res, err)
 
           }
@@ -136,7 +136,7 @@ const deleteAll = async (req, res) => {
   try {
     const deleteFeedback = await Issue.deleteMany({issue_title: /\w/i });
     if (deleteFeedback.deletedCount === 0) {
-      logAndSendError(402, 'error: no issue was deletd', res);
+      logAndSendError(402, 'error: no issue was deleted', res);
     } else {
       res.status(200).send('successfull deleted all, really all!!!');
     }
