@@ -59,7 +59,7 @@ module.exports = (app, myDataBase) => {
             res.body = createIssueForPostResponse(savedIssue)
             res.status(201).send(res.body);
           } catch(error) {
-            const err = `error: 'required field(s) missing'`
+            const err = {error: 'required field(s) missing' }
             logAndSendError(400, 'required field(s) missing', res, err)
 
           }
