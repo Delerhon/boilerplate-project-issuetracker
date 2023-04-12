@@ -88,7 +88,7 @@ module.exports = (app, myDataBase) => {
           return
         }
         updatePack.updated_on = Date.now()
-        
+
         updateByID(req, updatePack, res)
         // await updateOne(req, updatePack, res);
         
@@ -166,17 +166,9 @@ const deleteOne = async (project, req, res) => {
 };
 
 async function find(project, filter, res) {
-  let foundIssues
-  try {
     Issue.find(filter).byProject(project).exec()
-    .then((foundIssues) => {
-      //console.log(JSON.stringify(foundIssues));
-      res.json(foundIssues)
-    })
-    .catch((err) => logAndSendError(401, 'onFind: unknown error', res));
-  } catch (error) {
-    logAndSendError('onFind: unknown error', res);
-  }
+    .then((results) => res.json(results) )
+    .catch((err)    => logAndSendError(401, 'onFind: unknown error', res));
 }
 
 function createIssueForPostResponse(savedIssue) {
