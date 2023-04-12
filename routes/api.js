@@ -52,18 +52,18 @@ module.exports = (app, myDataBase) => {
           try {
             const savedIssue = await newIssue.save()
             if (savedIssue.errors) {
-              logAndSendError(401, 'Invalid issue data', res)
+              logAndSendError('Invalid issue data', res)
               return
             }
             res.body = createIssueForPostResponse(savedIssue)
-            res.status(201).send(res.body);
+            res.status(200).send(res.body);
           } catch(error) {
             if (error.code == 11000) {
               const err = { error: 'duplicate error' }
-              logAndSendError(402, err.error, res, err)
+              logAndSendError(err.error, res, err)
             } else {
               const err = {error: `required field(s) missing` }
-              logAndSendError(400, 'required field(s) missing', res, err)
+              logAndSendError('required field(s) missing', res, err)
           }
           }
         
@@ -77,21 +77,14 @@ module.exports = (app, myDataBase) => {
         const issueID = req.body._id
         const updatePack = createFilter(project, req)
 
-        /* if (getKeyLength(req.body) === 1) {
-          for (const key in req.body) {
-            if (req.body[key] == '_id') {
-              logAndSendError(430, 'no fields to update')
-            }
-          }
-        }  */
         if (!issueID) {
-          logAndSendError(410, 'missing _id', res, { error: 'missing _id' })
+          logAndSendError('missing _id', res, { error: 'missing _id' })
           return
         }
-        
+
         if (Object.keys(updatePack).length === 0) { 
           const error = {error: 'no update field(s) sent', '_id': req.body._id }
-          logAndSendError(420, 'no update field(s) sent', res, error)
+          logAndSendError('no update field(s) sent', res, error)
           return
         }
         updatePack.updated_on = Date.now()
@@ -108,7 +101,7 @@ module.exports = (app, myDataBase) => {
         let project = req.params.project;
         if (!req.body._id && !req.body.message) {
           const error = { error: 'missing _id' }
-          logAndSendError(404, 'error: missing _id', res, error)
+          logAndSendError('error: missing _id', res, error)
           return
         }
         if(req.body.message == 'delete all') {
@@ -127,12 +120,12 @@ const deleteAllTest = async (project, req, res) => {
   try {
     const deleteFeedback = await Issue.deleteMany({issue_title: /Test/i });
     if (deleteFeedback.deletedCount === 0) {
-      logAndSendError(402, 'error: could not delete all', res);
+      logAndSendError('error: could not delete all', res);
     } else {
       res.status(200).send('successfull deleted all');
     }
   } catch (error) {
-    logAndSendError(403, 'unexpected error onDeleteAll', res);
+    logAndSendError('unexpected error onDeleteAll', res);
   }
 };
 
@@ -140,12 +133,12 @@ const deleteAll = async (project, req, res) => {
   try {
     const deleteFeedback = await Issue.deleteMany({issue_title: /\w/i });
     if (deleteFeedback.deletedCount === 0) {
-      logAndSendError(402, 'error: no issue was deleted', res);
+      logAndSendError('error: no issue was deleted', res);
     } else {
       res.status(200).send('successfull deleted all, really all!!!');
     }
   } catch (error) {
-    logAndSendError(403, 'unexpected error onDeleteAll', res);
+    logAndSendError('unexpected error onDeleteAll', res);
   }
 };
 
@@ -154,7 +147,7 @@ const deleteOne = async (project, req, res) => {
     const deleteFeedback = await Issue.deleteOne({ project, _id: req.body._id });
     if (deleteFeedback.deletedCount === 0) {
       const error = { error: 'could not delete', _id: req.body._id }
-      logAndSendError(401, 'error: issue with requested _id was not found', res,  error);
+      logAndSendError('error: issue with requested _id was not found', res,  error);
     } else {
       console.log(' '.repeat(10) + 'successfull deleted'.bgGreen.white);
       const deleteResponse = {
@@ -166,9 +159,9 @@ const deleteOne = async (project, req, res) => {
   } catch (error) {
     const err = {error: 'could not delete', _id: req.body._id}
     if (!!error.message.match(/Cast to ObjectId/)) {
-      logAndSendError(401, 'error: issue with requested _id was not found', res, err)
+      logAndSendError('error: issue with requested _id was not found', res, err)
     } else {
-      logAndSendError(400, 'unknown error: issue could not deleted', res, err);
+      logAndSendError('unknown error: issue could not deleted', res, err);
     }
   };
 };
@@ -185,7 +178,7 @@ async function find(project, filter, res) {
     })
     .catch((err) => logAndSendError(401, 'onFind: unknown error', res));
   } catch (error) {
-    logAndSendError(400, 'onFind: unknown error', res);
+    logAndSendError('onFind: unknown error', res);
   }
 }
 
@@ -238,16 +231,16 @@ async function updateOne(issueID, updatePack, res) {
         result: 'successfully updated',
         _id: updateFeedback.id
       }
-      res.status(202).send(updateResponse);
+      res.status(200).send(updateResponse);
     } else {
-      logAndSendError(401, 'no match for update', res);
+      logAndSendError('no match for update', res);
     }
   } catch (error) {
     const err = { error: 'could not update', _id: issueID}
     if (!!error.message.match(/Cast to ObjectId/)) {
-      logAndSendError(402, error.message, res, err)
+      logAndSendError(error.message, res, err)
     }else {
-      logAndSendError(400, 'unknown error on update', res, err);
+      logAndSendError('unknown error on update', res, err);
     }
   }
 }
