@@ -83,7 +83,7 @@ suite("Functional Tests", function () {
         issue_text: "Wirhabenvielvor.",
       })
       .end(async (err, res) => {
-        assert.equal(res.status, 400);
+        assert.equal(res.body.status, 400);
         assert.equal(res.body.error, 'required field(s) missing');
         done();
       });
@@ -221,7 +221,7 @@ suite("Functional Tests", function () {
           created_by: 'not me'
         })
         .end(async (err, res) => {
-          assert.equal(res.status, 410);
+          assert.equal(res.body.status, 410);
           assert.equal(res.body.error, 'missing _id');
           done();
         });
@@ -241,7 +241,7 @@ suite("Functional Tests", function () {
           _id: testID,
         })          
         .end(async (err, res) => {
-            assert.equal(res.status, 420);
+            assert.equal(res.body.status, 420);
             assert.equal(res.body.error, 'no update field(s) sent' )
 
             done();
@@ -259,7 +259,7 @@ suite("Functional Tests", function () {
         created_by: 'not me'
       })
       .end(async (err, res) => {
-        assert.equal(res.status, 402);
+        assert.equal(res.body.status, 402);
         assert.equal(res.body.error, 'could not update')
         done();
       });
@@ -294,7 +294,7 @@ suite("Functional Tests", function () {
         _id: "198we1f",
       })
       .end(async (err, res) => {
-        assert.equal(res.status, 401)
+        assert.equal(res.body.status, 401)
         assert.equal(res.body.error, 'could not delete')
         assert.equal(res.body._id, "198we1f")
         done();
@@ -308,7 +308,7 @@ suite("Functional Tests", function () {
       .send({
       })
       .end((err, res) => {
-        assert.equal(res.status, 404);
+        assert.equal(res.body.status, 404);
         assert.equal(res.body.error, 'missing _id')
         chai.request(server).delete('/api/issues/apitest').send({message: 'delete all'})
         .end((err, res) => {

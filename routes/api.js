@@ -62,7 +62,7 @@ module.exports = (app, myDataBase) => {
               const err = { error: 'duplicate error' }
               logAndSendError(402, err.error, res, err)
             } else {
-              const err = {error: 'required field(s) missing' }
+              const err = {error: `required field(s) missing` }
               logAndSendError(400, 'required field(s) missing', res, err)
           }
           }

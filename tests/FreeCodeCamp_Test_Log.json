@@ -1,0 +1,337 @@
+#4 If you send a POST request to /api/issues/{projectname} without the required fields, returned will be the error { error: 'required field(s) missing' }
+[Error: {"error":"required field(s) missing"}]
+
+#6 You can send a GET request to /api/issues/{projectname} and filter the request by also passing along any field and value as a URL query (ie. /api/issues/{project}?open=false). You can pass one or more field/value pairs at once.
+[Error: {"error":"duplicate error"}]
+
+#8 When the PUT request sent to /api/issues/{projectname} does not include an _id, the return value is { error: 'missing _id' }.
+[Error: {"error":"no update field(s) sent"}]
+
+#9 When the PUT request sent to /api/issues/{projectname} does not include update fields, the return value is { error: 'no update field(s) sent', '_id': _id }. On any other error, the return value is { error: 'could not update', '_id': _id }.
+[Error: {"error":"no update field(s) sent","_id":"5f665eb46e296f6b9b6a504d"}]
+
+#10 You can send a DELETE request to /api/issues/{projectname} with an _id to delete an issue. If no _id is sent, the return value is { error: 'missing _id' }. On success, the return value is { result: 'successfully deleted', '_id': _id }. On failure, the return value is { error: 'could not delete', '_id': _id }.
+[Error: {"error":"missing _id"}]
+
+
+          #1 POST /api/issues/fcc-project
+body:
+{
+  issue_title: 'Faux Issue Title',
+  issue_text: 'Functional Test - Required Fields Only',
+  created_by: 'fCC'
+}
+query:
+{}
+params:
+{}
+          POST /api/issues/fcc-project
+body:
+{
+  issue_title: 'Faux Issue Title 2',
+  issue_text: 'Functional Test - Every field filled in',
+  created_by: 'fCC',
+  assigned_to: 'Chai and Mocha'
+}
+query:
+{}
+params:
+{}
+          #4 POST /api/issues/fcc-project
+body:
+{ created_by: 'fCC' }
+query:
+{}
+params:
+{}
+          400: required field(s) missing
+          [object Object]
+          POST /api/issues/get_issues_test_484311
+body:
+{
+  issue_text: 'Get Issues Test',
+  created_by: 'fCC',
+  issue_title: 'Faux Issue 1'
+}
+query:
+{}
+params:
+{}
+          POST /api/issues/get_issues_test_484311
+body:
+{
+  issue_text: 'Get Issues Test',
+  created_by: 'fCC',
+  issue_title: 'Faux Issue 2'
+}
+query:
+{}
+params:
+{}
+          POST /api/issues/get_issues_test_484311
+body:
+{
+  issue_text: 'Get Issues Test',
+  created_by: 'fCC',
+  issue_title: 'Faux Issue 3'
+}
+query:
+{}
+params:
+{}
+          GET /api/issues/get_issues_test_484311
+body:
+{}
+query:
+{}
+params:
+{}
+          POST /api/issues/get_issues_test_484682
+body:
+{
+  issue_title: 'To be Filtered',
+  issue_text: 'Filter Issues Test',
+  created_by: 'Alice',
+  assigned_to: 'Bob'
+}
+query:
+{}
+params:
+{}
+          POST /api/issues/get_issues_test_484682
+body:
+{
+  issue_title: 'To be Filtered',
+  issue_text: 'Filter Issues Test',
+  created_by: 'Alice',
+  assigned_to: 'Bob'
+}
+query:
+{}
+params:
+{}
+          402: duplicate error
+          [object Object]
+          POST /api/issues/fcc-project
+body:
+{
+  issue_title: 'Issue to be Updated',
+  issue_text: 'Functional Test - Put target',
+  created_by: 'fCC'
+}
+query:
+{}
+params:
+{}
+          PUT /api/issues/fcc-project
+body:
+{ _id: '6436710d90c890f1e437c055', issue_text: 'New Issue Text' }
+query:
+{}
+params:
+{}
+          GET /api/issues/fcc-project?_id=6436710d90c890f1e437c055
+body:
+{}
+query:
+{ _id: '6436710d90c890f1e437c055' }
+params:
+{}
+          PUT /api/issues/fcc-project
+body:
+{}
+query:
+{}
+params:
+{}
+          420: no update field(s) sent
+          [object Object]
+          PUT /api/issues/fcc-project
+body:
+{ _id: '5f665eb46e296f6b9b6a504d' }
+query:
+{}
+params:
+{}
+          420: no update field(s) sent
+          [object Object]
+          POST /api/issues/fcc-project
+body:
+{
+  issue_title: 'Issue to be Deleted',
+  issue_text: 'Functional Test - Delete target',
+  created_by: 'fCC'
+}
+query:
+{}
+params:
+{}
+          DELETE /api/issues/fcc-project
+body:
+{ _id: '6436710d90c890f1e437c059' }
+query:
+{}
+params:
+{}
+          successfull deleted
+          DELETE /api/issues/fcc-project
+body:
+{}
+query:
+{}
+params:
+{}
+          404: error: missing _id
+          [object Object]
+          GET /_api/get-tests
+body:
+{}
+query:
+{}
+params:
+{}
+requested
+
+
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+          POST /api/issues/fcc-project
+{
+  issue_title: 'Faux Issue Title',
+  issue_text: 'Functional Test - Required Fields Only',
+  created_by: 'fCC'
+}
+{}
+{}
+          POST /api/issues/fcc-project
+{
+  issue_title: 'Faux Issue Title 2',
+  issue_text: 'Functional Test - Every field filled in',
+  created_by: 'fCC',
+  assigned_to: 'Chai and Mocha'
+}
+{}
+{}
+          POST /api/issues/fcc-project
+{ created_by: 'fCC' }
+{}
+{}
+          400: required field(s) missing
+          [object Object]
+          POST /api/issues/get_issues_test_289051
+{
+  issue_text: 'Get Issues Test',
+  created_by: 'fCC',
+  issue_title: 'Faux Issue 1'
+}
+{}
+{}
+          POST /api/issues/get_issues_test_289051
+{
+  issue_text: 'Get Issues Test',
+  created_by: 'fCC',
+  issue_title: 'Faux Issue 2'
+}
+{}
+{}
+          POST /api/issues/get_issues_test_289051
+{
+  issue_text: 'Get Issues Test',
+  created_by: 'fCC',
+  issue_title: 'Faux Issue 3'
+}
+{}
+{}
+          GET /api/issues/get_issues_test_289051
+{}
+{}
+{}
+          POST /api/issues/get_issues_test_289392
+{
+  issue_title: 'To be Filtered',
+  issue_text: 'Filter Issues Test',
+  created_by: 'Alice',
+  assigned_to: 'Bob'
+}
+{}
+{}
+          POST /api/issues/get_issues_test_289392
+{
+  issue_title: 'To be Filtered',
+  issue_text: 'Filter Issues Test',
+  created_by: 'Alice',
+  assigned_to: 'Bob'
+}
+{}
+{}
+          400: required field(s) missing
+          [object Object]
+          POST /api/issues/fcc-project
+{
+  issue_title: 'Issue to be Updated',
+  issue_text: 'Functional Test - Put target',
+  created_by: 'fCC'
+}
+{}
+{}
+          PUT /api/issues/fcc-project
+{ _id: '6435cc3aab21f859db37ecff', issue_text: 'New Issue Text' }
+{}
+{}
+          GET /api/issues/fcc-project?_id=6435cc3aab21f859db37ecff
+{}
+{ _id: '6435cc3aab21f859db37ecff' }
+{}
+          PUT /api/issues/fcc-project
+{}
+{}
+{}
+          420: no update field(s) sent
+          [object Object]
+          PUT /api/issues/fcc-project
+{ _id: '5f665eb46e296f6b9b6a504d' }
+{}
+{}
+          420: no update field(s) sent
+          [object Object]
+          POST /api/issues/fcc-project
+{
+  issue_title: 'Issue to be Deleted',
+  issue_text: 'Functional Test - Delete target',
+  created_by: 'fCC'
+}
+{}
+{}
+          DELETE /api/issues/fcc-project
+{ _id: '6435cc3aab21f859db37ed03' }
+{}
+{}
+          successfull deleted
+          DELETE /api/issues/fcc-project
+{}
+{}
+{}
+          404: error: missing _id
+          [object Object]
+          GET /_api/get-tests
+{}
+{}
+{}
+requested
