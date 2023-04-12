@@ -63,7 +63,7 @@ module.exports = (app, myDataBase) => {
               logAndSendError(err, res, err)
             } else {
               const err = {error: `required field(s) missing` }
-              logAndSendError(error, res, err)
+              logAndSendError(err, res, err)
           }
           }
         
@@ -237,7 +237,7 @@ async function updateOne(req, updatePack, res) {
     if (!!error.message.match(/Cast to ObjectId/)) {
       logAndSendError(err, res, err)
     }else {
-      logAndSendError('unknown error on update', res, err);
+      logAndSendError(err, res, err);
     }
   }
 }
