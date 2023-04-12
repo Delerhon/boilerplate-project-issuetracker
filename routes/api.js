@@ -83,7 +83,7 @@ module.exports = (app, myDataBase) => {
         }
 
         if (Object.keys(updatePack).length === 0) { 
-          const error = {error: 'no update field(s) sent', _id: issueID }
+          const error = {error: 'no update field(s) sent', '_id': issueID }
           logAndSendError('no update field(s) sent', res, error)
           return
         }
@@ -236,7 +236,7 @@ async function updateOne(issueID, updatePack, res) {
       logAndSendError('no match for update', res);
     }
   } catch (error) {
-    const err = { error: 'could not update', _id: issueID}
+    const err = { error: 'could not update', '_id': issueID}
     if (!!error.message.match(/Cast to ObjectId/)) {
       logAndSendError(error.message, res, err)
     }else {
