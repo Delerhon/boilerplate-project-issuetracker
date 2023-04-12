@@ -84,6 +84,10 @@ module.exports = (app, myDataBase) => {
             }
           }
         }  */
+        if (!issueID) {
+          logAndSendError(410, 'missing _id', res, { error: 'missing _id' })
+          return
+        }
         
         if (Object.keys(updatePack).length === 0) { 
           const error = {error: 'no update field(s) sent', '_id': req.body._id }
@@ -92,10 +96,7 @@ module.exports = (app, myDataBase) => {
         }
         updatePack.updated_on = Date.now()
 
-        if (!issueID) {
-          logAndSendError(410, 'missing _id', res, { error: 'missing _id' })
-          return
-        }
+
 
         await updateOne(issueID, updatePack, res);
         
