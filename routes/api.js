@@ -85,7 +85,7 @@ module.exports = (app, myDataBase) => {
           }
         }  */
         
-        if (Object.keys(updatePack).length === 0) { 
+        if (Object.keys(updatePack).length === 1) { 
           const error = {error: 'no update field(s) sent', '_id': req.body._id }
           logAndSendError(420, 'no update field(s) sent', res, error)
           return
