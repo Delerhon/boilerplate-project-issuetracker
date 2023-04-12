@@ -91,7 +91,7 @@ module.exports = (app, myDataBase) => {
 
 
 
-        await updateOne(issueID, updatePack, res);
+        await updateOne(req, updatePack, res);
         
       })
       
@@ -166,8 +166,6 @@ const deleteOne = async (project, req, res) => {
   };
 };
 
-
-
 async function find(project, filter, res) {
   let foundIssues
   try {
@@ -181,8 +179,6 @@ async function find(project, filter, res) {
     logAndSendError('onFind: unknown error', res);
   }
 }
-
-
 
 function createIssueForPostResponse(savedIssue) {
   return {
@@ -223,9 +219,9 @@ function createFilter(project, req) {
 }
 
 
-async function updateOne(issueID, updatePack, res) {
+async function updateOne(req, updatePack, res) {
   try {
-    const updateFeedback = await Issue.findOneAndUpdate({ _id: issueID }, updatePack, { new: true });
+    const updateFeedback = await Issue.findOneAndUpdate({ _id: req.body._id }, updatePack, { new: true });
     if (updateFeedback) {
       const updateResponse = {
         result: 'successfully updated',
@@ -236,7 +232,7 @@ async function updateOne(issueID, updatePack, res) {
       logAndSendError('no match for update', res);
     }
   } catch (error) {
-    const err = { error: 'could not update', '_id': issueID }
+    const err = { error: 'could not update', '_id': req.body._id }
     if (!!error.message.match(/Cast to ObjectId/)) {
       logAndSendError(error.message, res, err)
     }else {
