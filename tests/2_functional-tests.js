@@ -22,13 +22,13 @@ suite("Functional Tests", function () {
   test("#1 Create an issue with every field: POST request to /api/issues/{project}", (done) => {
     chai
       .request(server)
-      .post(`/api/issues/apitest`) // ?_id=test1&issue_title=Dertest&issue_text=Wirhabenvielvor.&created_by=chaiTest#1&assigned_to=FreeCodeCamp&status_text=test#1
+      .post(`/api/issues/apitest`) 
       .send({
-        issue_title: "Test #1",
+        issue_title: "Test 1",
         issue_text: "Wirhabenvielvor.",
         created_by: "chaiTest",
         assigned_to: "FreeCodeCamp",
-        status_text: "test#1",
+        status_text: "test1",
       })
       .end(async (err, res) => {
         assert.equal(res.status, 201);
@@ -43,12 +43,7 @@ suite("Functional Tests", function () {
           "open",
           "status_text",
         ]);
-        //assert.equal(res.body.acknowledged, true); // Funktion, die die Daten verarbeitet und zurückgibt
-        await chai
-          .request(server)
-          .delete("/api/issues/apitest")
-          .send({ message: "delete all" }),
-          done();
+        done();
       });
   });
 
@@ -57,9 +52,10 @@ suite("Functional Tests", function () {
       .request(server)
       .post(`/api/issues/apitest`)
       .send({
-        issue_title: "Test #2",
+        issue_title: "Test 2",
         issue_text: "Wirhabenvielvor.",
         created_by: "chaiTest",
+        open: false
       })
       .end(async (err, res) => {
         assert.equal(res.status, 201)
@@ -74,12 +70,7 @@ suite("Functional Tests", function () {
           "open",
           "status_text",
         ]);
-
-        await chai
-          .request(server)
-          .delete("/api/issues/apitest")
-          .send({ message: "delete all" }),
-          done();
+        done();
       });
   });
 
@@ -88,17 +79,13 @@ suite("Functional Tests", function () {
       .request(server)
       .post(`/api/issues/apitest`)
       .send({
-        issue_title: "Test #2",
+        issue_title: "Test 2",
         issue_text: "Wirhabenvielvor.",
       })
       .end(async (err, res) => {
         assert.equal(res.status, 400);
         assert.equal(res.body.error, 'required field(s) missing');
-        await chai
-          .request(server)
-          .delete("/api/issues/apitest")
-          .send({ message: "delete all" }),
-          done();
+        done();
       });
   });
 
@@ -106,51 +93,27 @@ suite("Functional Tests", function () {
     Promise.all([
       chai
         .request(server)
-        .post(`/api/issues/apitest`)
+        .post(`/api/issues/apitest2`)
         .send({
-          issue_title: "Test #10",
+          issue_title: "Test 10",
           issue_text: "Wirhabenvielvor.",
-          created_by: "chaiTest",
+          created_by: "notchaiTest",
           assigned_to: "FreeCodeCamp",
           status_text: "test#1",
-        }),
-      chai
-        .request(server)
-        .post(`/api/issues/apitest`)
-        .send({
-          issue_title: "Test #11",
-          issue_text: "Wirhabenvielvor.",
-          created_by: "chaiTest",
-          assigned_to: "FreeCodeCamp",
-          status_text: "test#1",
-        }),
-      chai
-        .request(server)
-        .post(`/api/issues/apitest`)
-        .send({
-          issue_title: "Test #12",
-          issue_text: "Wirhabenvielvor.",
-          created_by: "chaiTest",
-          assigned_to: "FreeCodeCamp",
-          status_text: "test#1",
-        }),
+        })
     ])
       .then(() => {
         chai
           .request(server)
           .get(`/api/issues/apitest`)
           .end(async (err, res) => {
-            assert.lengthOf(res.body, 3)
+            assert.lengthOf(res.body, 2)
             assert.isArray(res.body);
-            await chai
-              .request(server)
-              .delete("/api/issues/apitest")
-              .send({ message: "delete all" }),
-              done();
+            done();
           });
       })
       .catch((error) => {
-        logError(400, "unknown error in test #10");
+        logError(400, "unknown error in test 10");
         done();
       });
   });
@@ -161,46 +124,13 @@ suite("Functional Tests", function () {
         .request(server)
         .post(`/api/issues/apitest`)
         .send({
-          issue_title: "Test #20",
-          issue_text: "Wirhabenvielvor.",
+          issue_title: "Test 20",
+          issue_text: "nö",
           created_by: "chaiTest",
           assigned_to: "FreeCodeCamp",
           status_text: "test#1",
           open: true
-        }),
-      chai
-        .request(server)
-        .post(`/api/issues/apitest`)
-        .send({
-          issue_title: "Test #21",
-          issue_text: "Dertest.",
-          created_by: "NotchaiTest",
-          assigned_to: "FreeCodeCamp",
-          status_text: "test#1",
-          open: true
-        }),
-      chai
-        .request(server)
-        .post(`/api/issues/apitest`)
-        .send({
-          issue_title: "Test #22",
-          issue_text: "kein Test",
-          created_by: "chaiTest",
-          assigned_to: "FreeCodeCamp",
-          status_text: "test#1",
-          open: false
-        }),
-      chai
-        .request(server)
-        .post(`/api/issues/apitest`)
-        .send({
-          issue_title: "Test #23",
-          issue_text: "kein Test",
-          created_by: "chaiTest",
-          assigned_to: "FreeCodeCamp",
-          status_text: "test#1",
-          open: false
-        }),
+        })
     ])
       .then(() => {
         chai
@@ -208,13 +138,9 @@ suite("Functional Tests", function () {
           .get(`/api/issues/apitest?open=true`)
           .end(async (err, res) => {
             assert.equal(res.body.length, 2);
-            assert.isTrue(isValueInObject(res.body, "Test #20"), "is Test #20");
-            assert.isTrue(isValueInObject(res.body, "Test #21"), "is Test #21");
-            await chai
-              .request(server)
-              .delete("/api/issues/apitest")
-              .send({ message: "delete all" }),
-              done();
+            assert.equal(res.body[0].issue_title, "Test 1");
+            assert.equal(res.body[1].issue_title, "Test 20");
+            done();
           });
       })
       .catch((err) => {
@@ -224,352 +150,154 @@ suite("Functional Tests", function () {
   });
 
   test("#30 View issues on a project with multiple filters: GET request to /api/issues/{project}", (done) => {
-    Promise.all([
-      chai
-        .request(server)
-        .post(`/api/issues/apitest`)
-        .send({
-          issue_title: "Test #30",
-          issue_text: "Wirhabenvielvor.",
-          created_by: "chaiTest",
-          assigned_to: "FreeCodeCamp",
-          status_text: "test#1",
-          open: true
-        }),
-      chai
-        .request(server)
-        .post(`/api/issues/apitest`)
-        .send({
-          issue_title: "Test #31",
-          issue_text: "Dertest.",
-          created_by: "notchaiTest",
-          assigned_to: "FreeCodeCamp",
-          status_text: "test#1",
-          open: true
-        }),
-      chai
-        .request(server)
-        .post(`/api/issues/apitest`)
-        .send({
-          issue_title: "Test #32",
-          issue_text: "kein Test",
-          created_by: "notchaiTest",
-          assigned_to: "FreeCodeCamp",
-          status_text: "test#1",
-          open: true
-        }),
-      chai
-        .request(server)
-        .post(`/api/issues/apitest`)
-        .send({
-          issue_title: "Test #33",
-          issue_text: "kein Test",
-          created_by: "notchaiTest",
-          assigned_to: "FreeCodeCamp",
-          status_text: "test#1",
-          open: true
-        }),
-      chai
-        .request(server)
-        .post(`/api/issues/apitest`)
-        .send({
-          issue_title: "Test #34",
-          issue_text: "kein Test",
-          created_by: "chaiTest",
-          assigned_to: "FreeCodeCamp",
-          status_text: "test#1",
-          open: true
-        }),
-    ])
-      .then(() => {
-        chai
-          .request(server)
-          .get(`/api/issues/apitest?issue_text=kein Test&created_by=notchaiTest`)
-          .end(async (err, res) => {
-            assert.lengthOf(res.body, 2);
-            assert.isTrue(isValueInObject(res.body, "Test #32"));
-            assert.isTrue(isValueInObject(res.body, "Test #33"));
-            await chai
-              .request(server)
-              .delete("/api/issues/apitest")
-              .send({ message: "delete all" });
-            done();
-          });
-      })
-      .catch((err) => {
-        console.log(err);
-        done(err);
+    chai
+      .request(server)
+      .get(`/api/issues/apitest?issue_text=Wirhabenvielvor.&created_by=chaiTest`)
+      .end(async (err, res) => {
+        assert.lengthOf(res.body, 2);
+        assert.equal(res.body[0].issue_title, "Test 1");
+        assert.equal(res.body[1].issue_title, "Test 2");
+        done();
       });
+
   });
 
   test("#40 Update one field on an issue: PUT request to /api/issues/{project}", (done) => {
-    Promise.all([
-      chai
-        .request(server)
-        .post(`/api/issues/apitest`)
-        .send({
-          issue_title: "Test #40",
-          issue_text: "Wirhabenvielvor.",
-          created_by: "chaiTest",
-          assigned_to: "FreeCodeCamp",
-          status_text: "test#1",
-          open: true
-        }),
-    ])
-      .then(([resPut]) => {
+    chai
+      .request(server)
+      .get('/api/issues/apitest?issue_title=Test 1')
+      .end( (err, res) => {
+        const testID = res.body["0"]._id
         chai
           .request(server)
           .put(`/api/issues/apitest`)
           .send({
-            _id: resPut.body._id,
+            _id: testID,
             issue_text: "doch nicht",
           })
           .end(async (err, res) => {
             assert.equal(res.status, 202)
             assert.equal(res.body.result, 'successfully updated');
-            assert.equal(res.body._id, resPut.body._id);
-            await chai
-            
-              .request(server)
-              .delete("/api/issues/apitest")
-              .send({ message: "delete all" });
+            assert.equal(res.body._id, testID)
             done();
           });
-      })
-      .catch((err) => {
-        console.log(err);
-        done(err);
-      });
+        })
   });
 
   test("#50 Update multiple fields on an issue: PUT request to /api/issues/{project}", (done) => {
-    Promise.all([
-      chai
-        .request(server)
-        .post(`/api/issues/apitest`)
-        .send({
-          issue_title: "Test #50",
-          issue_text: "Wirhabenvielvor.",
-          created_by: "chaiTest",
-          assigned_to: "FreeCodeCamp",
-          status_text: "test#1",
-          open: true
-        }),
-    ])
-      .then(([resPut]) => {
+    chai
+      .request(server)
+      .get('/api/issues/apitest?issue_title=Test 1')
+      .end( (err, res) => {
+        const testID = res.body["0"]._id
         chai
           .request(server)
           .put(`/api/issues/apitest`)
           .send({
-            _id: resPut.body._id,
+            _id: testID,
             issue_text: "doch nicht",
-            created_by: "Salamander",
+            created_by: 'not me'
           })
           .end(async (err, res) => {
             assert.equal(res.status, 202)
             assert.equal(res.body.result, 'successfully updated');
-            assert.equal(res.body._id, resPut.body._id);
-            await chai
-              .request(server)
-              .delete("/api/issues/apitest")
-              .send({ message: "delete all" });
+            assert.equal(res.body._id, testID)
             done();
           });
-      })
-      .catch((err) => {
-        console.log(err);
-        done(err);
-      });
+        })
   });
 
   test("#60 Update an issue with missing _id: PUT request to /api/issues/{project}", (done) => {
-    Promise.all([
+    chai
+    .request(server)
+    .get('/api/issues/apitest?issue_title=Test 1')
+    .end( (err, res) => {
+      const testID = res.body["0"]._id
       chai
         .request(server)
-        .post(`/api/issues/apitest`)
+        .put(`/api/issues/apitest`)
         .send({
-          issue_title: "Test #60",
-          issue_text: "Wirhabenvielvor.",
-          created_by: "chaiTest",
-          assigned_to: "FreeCodeCamp",
-          status_text: "test#1",
-          open: true
-        }),
-    ])
-      .then(([res]) => {
-        chai
-          .request(server)
-          .put(`/api/issues/apitest`)
-          .send({
-            issue_text: "doch nicht",
-            created_by: "Salamander",
-          })
-          .end(async (err, res) => {
-            assert.equal(res.status, 410);
-            assert.equal(res.body.error, 'missing _id');
-            await chai
-              .request(server)
-              .delete("/api/issues/apitest")
-              .send({ message: "delete all" });
-            done();
-          });
+          issue_text: "doch nicht",
+          created_by: 'not me'
+        })
+        .end(async (err, res) => {
+          assert.equal(res.status, 410);
+          assert.equal(res.body.error, 'missing _id');
+          done();
+        });
       })
-      .catch((err) => {
-        console.log(err);
-        done(err);
-      });
-  });
+  });    
 
   test("#70   Update an issue with no fields to update: PUT request to /api/issues/{project}", (done) => {
-    Promise.all([
+    chai
+    .request(server)
+    .get('/api/issues/apitest?issue_title=Test 1')
+    .end( (err, res) => {
+      const testID = res.body["0"]._id
       chai
         .request(server)
-        .post(`/api/issues/apitest`)
+        .put(`/api/issues/apitest`)
         .send({
-          issue_title: "Test #70",
-          issue_text: "Wirhabenvielvor.",
-          created_by: "chaiTest",
-          assigned_to: "FreeCodeCamp",
-          status_text: "test#1",
-          open: true
-        }),
-    ])
-      .then(([res]) => {
-        chai
-          .request(server)
-          .put(`/api/issues/apitest`)
-          .send({
-            _id: res.body._id
-          })
-          .end(async (err, res) => {
+          _id: testID,
+        })          
+        .end(async (err, res) => {
             assert.equal(res.status, 420);
             assert.equal(res.body.error, 'no update field(s) sent' )
-            await chai
-              .request(server)
-              .delete("/api/issues/apitest")
-              .send({ message: "delete all" });
+
             done();
           });
       })
-      .catch((err) => {
-        console.log(err);
-        done(err);
-      });
   });
 
   test("#80   Update an issue with an invalid _id: PUT request to /api/issues/{project}", (done) => {
-    Promise.all([
-      chai
-        .request(server)
-        .post(`/api/issues/apitest`)
-        .send({
-          issue_title: "Test #80",
-          issue_text: "Wirhabenvielvor.",
-          created_by: "chaiTest",
-          assigned_to: "FreeCodeCamp",
-          status_text: "test#1",
-        }),
-    ])
-      .then(([res]) => {
-        chai
-          .request(server)
-          .put(`/api/issues/apitest`)
-          .send({
-            _id: "16w1erf9816981",
-            issue_text: "neu",
-          })
-          .end(async (err, res) => {
-            assert.equal(res.status, 402);
-            await chai
-              .request(server)
-              .delete("/api/issues/apitest")
-              .send({ message: "delete all" });
-            done();
-          });
+    chai
+      .request(server)
+      .put(`/api/issues/apitest`)
+      .send({
+        _id: 'eargae',
+        issue_text: "doch nicht",
+        created_by: 'not me'
       })
-      .catch((err) => {
-        console.log(err);
-        done(err);
+      .end(async (err, res) => {
+        assert.equal(res.status, 402);
+        assert.equal(res.body.error, 'could not update')
+        done();
       });
   });
 
   test("#90   Delete an issue: DELETE request to /api/issues/{project}", (done) => {
-    Promise.all([
+    chai
+    .request(server)
+    .get('/api/issues/apitest?issue_title=Test 1')
+    .end( (err, res) => {   
+      const getID = res.body["0"]._id 
       chai
         .request(server)
-        .post(`/api/issues/apitest`)
+        .delete(`/api/issues/apitest`)
         .send({
-          issue_title: "Test #90",
-          issue_text: "Wirhabenvielvor.",
-          created_by: "chaiTest",
-          assigned_to: "FreeCodeCamp",
-          status_text: "test#1",
-          open: true
-        }),
-    ])
-      .then(([resPut]) => {
-        chai
-          .request(server)
-          .delete(`/api/issues/apitest`)
-          .send({
-            _id: resPut.body._id,
-          })
-          .end(async (err, res) => {
-            assert.equal(res.status, 200);
-            assert.equal(res.body.result, 'successfully deleted')
-            assert.equal(res.body._id, resPut.body._id)
-            if (err) {
-              await chai
-                .request(server)
-                .delete("/api/issues/apitest")
-                .send({ message: "delete all" });
-            }
-            done();
-          });
+          _id: getID,
+        })
+        .end(async (err, res) => {
+          assert.equal(res.status, 200);
+          assert.equal(res.body.result, 'successfully deleted')
+          assert.equal(res.body._id, getID)
+          done();
+        });
       })
-      .catch((err) => {
-        console.log(err);
-        done(err);
-      });
   });
 
   test("#100   Delete an issue with an invalid _id: DELETE request to /api/issues/{project}", (done) => {
-    Promise.all([
-      chai
-        .request(server)
-        .post(`/api/issues/apitest`)
-        .send({
-          issue_title: "Test #100",
-          issue_text: "Wirhabenvielvor.",
-          created_by: "chaiTest",
-          assigned_to: "FreeCodeCamp",
-          status_text: "test#1",
-          open: true
-        }),
-    ])
-      .then(([resPut]) => {
-        chai
-          .request(server)
-          .delete(`/api/issues/apitest`)
-          .send({
-            _id: "198we1f",
-          })
-          .end(async (err, res) => {
-            assert.equal(res.status, 401)
-            assert.equal(res.body.error, 'could not delete')
-            assert.equal(res.body._id, "198we1f")
-            if (err) {
-              await chai
-                .request(server)
-                .delete("/api/issues/apitest")
-                .send({ message: "delete all" });
-            }
-            done();
-          });
+    chai
+      .request(server)
+      .delete(`/api/issues/apitest`)
+      .send({
+        _id: "198we1f",
       })
-      .catch((err) => {
-        console.log(err);
-        done(err);
+      .end(async (err, res) => {
+        assert.equal(res.status, 401)
+        assert.equal(res.body.error, 'could not delete')
+        assert.equal(res.body._id, "198we1f")
+        done();
       });
   });
 
@@ -578,13 +306,16 @@ suite("Functional Tests", function () {
       .request(server)
       .delete(`/api/issues/apitest`)
       .send({
-        _id: "",
       })
       .end((err, res) => {
         assert.equal(res.status, 404);
         assert.equal(res.body.error, 'missing _id')
+        chai.request(server).delete('/api/issues/apitest').send({message: 'delete all'})
+        .end((err, res) => {
+          chai.request(server).delete('/api/issues/apitest2').send({message: 'delete all'})
         done();
-      });
+        })
+      })
   });
 
   // end of Suite()

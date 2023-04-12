@@ -25,7 +25,6 @@ module.exports = (app, myDataBase) => {
     // ///////////////////////////////////////////////////////////////////////  GET
       .get(async function (req, res){
         let project = req.params.project;
-        let foundIssues
         const filter = {}
 
         if (getKeyLength(req.query) > 0) {
@@ -39,7 +38,7 @@ module.exports = (app, myDataBase) => {
             } 
           }
         }
-        foundIssues = await find(foundIssues, filter, res);
+        await find(project, filter, res);
       })
 
     // ///////////////////////////////////////////////////////////////////////  POST
@@ -48,7 +47,7 @@ module.exports = (app, myDataBase) => {
         const timer = Date.now()
         let project = req.params.project;
         const body = req.body
-        const newIssue = createNewIssue(body)
+        const newIssue = createNewIssue(project, body)
 
           try {
             const savedIssue = await newIssue.save()
@@ -59,6 +58,10 @@ module.exports = (app, myDataBase) => {
             res.body = createIssueForPostResponse(savedIssue)
             res.status(201).send(res.body);
           } catch(error) {
+            if (error.code == 11000) {
+              const err = { error: 'duplicate error' }
+              logAndSendError(402, err.error, res, err)
+            }
             const err = {error: 'required field(s) missing' }
             logAndSendError(400, 'required field(s) missing', res, err)
 
@@ -72,7 +75,7 @@ module.exports = (app, myDataBase) => {
         const timer = Date.now()
         let project = req.params.project;
         const issueID = req.body._id
-        const updatePack = createFilter(req)
+        const updatePack = createFilter(project, req)
 
         /* if (getKeyLength(req.body) === 1) {
           for (const key in req.body) {
@@ -108,18 +111,18 @@ module.exports = (app, myDataBase) => {
           return
         }
         if(req.body.message == 'delete all') {
-          await deleteAllTest(req, res);
+          await deleteAllTest(project, req, res);
           return
         }
         if (req.body.message == 'delete all issues, i know what i am doing') {
-          deleteAll(req, res)
+          deleteAll(project, req, res)
           return
         }
-        await deleteOne(req, res);
+        await deleteOne(project, req, res);
       })
 };
 
-const deleteAllTest = async (req, res) => {
+const deleteAllTest = async (project, req, res) => {
   try {
     const deleteFeedback = await Issue.deleteMany({issue_title: /Test/i });
     if (deleteFeedback.deletedCount === 0) {
@@ -132,7 +135,7 @@ const deleteAllTest = async (req, res) => {
   }
 };
 
-const deleteAll = async (req, res) => {
+const deleteAll = async (project, req, res) => {
   try {
     const deleteFeedback = await Issue.deleteMany({issue_title: /\w/i });
     if (deleteFeedback.deletedCount === 0) {
@@ -145,9 +148,9 @@ const deleteAll = async (req, res) => {
   }
 };
 
-const deleteOne = async (req, res) => {
+const deleteOne = async (project, req, res) => {
   try {
-    const deleteFeedback = await Issue.deleteOne({ _id: req.body._id });
+    const deleteFeedback = await Issue.deleteOne({ project, _id: req.body._id });
     if (deleteFeedback.deletedCount === 0) {
       const error = { error: 'could not delete', _id: req.body._id }
       logAndSendError(401, 'error: issue with requested _id was not found', res,  error);
@@ -171,14 +174,18 @@ const deleteOne = async (req, res) => {
 
 
 
-async function find(foundIssues, filter, res) {
+async function find(project, filter, res) {
+  let foundIssues
   try {
-    foundIssues = await Issue.find(filter);
-    res.json(foundIssues);
+    Issue.find(filter).byProject(project).exec()
+    .then((foundIssues) => {
+      //console.log(JSON.stringify(foundIssues));
+      res.json(foundIssues)
+    })
+    .catch((err) => logAndSendError(401, 'onFind: unknown error', res));
   } catch (error) {
     logAndSendError(400, 'onFind: unknown error', res);
   }
-  return foundIssues;
 }
 
 
@@ -197,8 +204,9 @@ function createIssueForPostResponse(savedIssue) {
   };
 }
 
-function createNewIssue(body) {
+function createNewIssue(project, body) {
   return new Issue({
+    project,
     issue_title: body.issue_title,
     issue_text: body.issue_text,
     assigned_to: body.assigned_to,
@@ -208,7 +216,7 @@ function createNewIssue(body) {
   });
 }
 
-function createFilter(req) {
+function createFilter(project, req) {
   const updatePack = {}
   if (getKeyLength(req.body) > 1) {
     for (const key in req.body) {

@@ -3,6 +3,10 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose
 
 const issueSchema = new Schema({
+    project: {
+        type: String,
+        required: true
+    },
     issue_title: {
         type: String,
         required: true,
@@ -42,6 +46,19 @@ const issueSchema = new Schema({
     query: {
         byID(id) {
             return this.where({ _id: id }).sort('_id')
+        },
+        byProject(project) {
+            return this.where({ project: project }).sort('_id').select([
+                '_id',
+                'issue_text',
+                'issue_title',
+                'created_by',
+                'created_on',
+                'updated_on',
+                'open',
+                'status_text',
+                'assigned_to'
+            ])
         }
     }
 }

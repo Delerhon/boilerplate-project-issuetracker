@@ -38,9 +38,9 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use((req, res, next) => {
   console.log(' '.repeat(10) + `${req.method} ${req.url}`)
-  console.log(req.body)
-  console.log(req.query)
-  console.log(req.params)
+  //console.log(req.body)
+  // console.log(req.query)
+  // console.log(req.params) 
 
   next()
 })
