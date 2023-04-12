@@ -61,10 +61,10 @@ module.exports = (app, myDataBase) => {
             if (error.code == 11000) {
               const err = { error: 'duplicate error' }
               logAndSendError(402, err.error, res, err)
-            }
-            const err = {error: 'required field(s) missing' }
-            logAndSendError(400, 'required field(s) missing', res, err)
-
+            } else {
+              const err = {error: 'required field(s) missing' }
+              logAndSendError(400, 'required field(s) missing', res, err)
+          }
           }
         
       })
