@@ -56,7 +56,7 @@ module.exports = (app, myDataBase) => {
               return
             }
             res.body = createIssueForPostResponse(savedIssue)
-            res.status(200).send(res.body);
+            res.status(200).json(res.body);
           } catch(error) {
             if (error.code == 11000) {
               const err = { error: 'duplicate error' }
@@ -123,7 +123,7 @@ const deleteAllTest = async (project, req, res) => {
     if (deleteFeedback.deletedCount === 0) {
       logAndSendError('error: could not delete all', res);
     } else {
-      res.status(200).send('successfull deleted all');
+      res.status(200).json('successfull deleted all');
     }
   } catch (error) {
     logAndSendError('unexpected error onDeleteAll', res);
@@ -136,7 +136,7 @@ const deleteAll = async (project, req, res) => {
     if (deleteFeedback.deletedCount === 0) {
       logAndSendError('error: no issue was deleted', res);
     } else {
-      res.status(200).send('successfull deleted all, really all!!!');
+      res.status(200).json('successfull deleted all, really all!!!');
     }
   } catch (error) {
     logAndSendError('unexpected error onDeleteAll', res);
@@ -155,7 +155,7 @@ const deleteOne = async (project, req, res) => {
         result: 'successfully deleted',
         _id: req.body._id
       }
-      res.status(200).send(deleteResponse);
+      res.status(200).json(deleteResponse);
     }
   } catch (error) {
     const err = {error: 'could not delete', _id: req.body._id}
@@ -228,7 +228,7 @@ async function updateOne(req, updatePack, res) {
         result: 'successfully updated',
         _id: updateFeedback.id
       }
-      res.status(200).send(updateResponse);
+      res.status(200).json(updateResponse);
     } else {
       logAndSendError('no match for update', res);
     }

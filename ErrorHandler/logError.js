@@ -3,7 +3,7 @@ const colors = require('colors');
 const logAndSendError = (message, res, err = {}) => {
     console.log(' '.repeat(10) + JSON.stringify(message).bgRed.black)
     //console.log(' '.repeat(10) + JSONerr);
-    res.status(200).send(err)
+    res.status(200).json(err)
 }
 
 const logError = (message) => {
