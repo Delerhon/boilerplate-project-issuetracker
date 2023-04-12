@@ -74,8 +74,7 @@ module.exports = (app, myDataBase) => {
       .put(async function (req, res){
         const timer = Date.now()
         let project = req.params.project;
-        let issueID = ''
-        issueID = req.body._id
+        const issueID = req.body._id
         const updatePack = createFilter(project, req)
 
         if (!issueID) {
@@ -84,7 +83,7 @@ module.exports = (app, myDataBase) => {
         }
 
         if (Object.keys(updatePack).length === 0) { 
-          const error = {error: 'no update field(s) sent', '_id': req.body._id }
+          const error = {error: 'no update field(s) sent', _id: issueID }
           logAndSendError('no update field(s) sent', res, error)
           return
         }
