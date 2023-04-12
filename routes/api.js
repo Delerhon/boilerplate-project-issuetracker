@@ -60,10 +60,10 @@ module.exports = (app, myDataBase) => {
           } catch(error) {
             if (error.code == 11000) {
               const err = { error: 'duplicate error' }
-              logAndSendError(err.error, res, err)
+              logAndSendError(err, res, err)
             } else {
               const err = {error: `required field(s) missing` }
-              logAndSendError('required field(s) missing', res, err)
+              logAndSendError(error, res, err)
           }
           }
         
@@ -78,13 +78,14 @@ module.exports = (app, myDataBase) => {
         const updatePack = createFilter(project, req)
 
         if (!issueID) {
-          logAndSendError('missing _id', res, { error: 'missing _id' })
+          const error = { error: 'missing _id' }
+          logAndSendError(error, res, error)
           return
         }
 
         if (Object.keys(updatePack).length === 0) { 
           const error = {error: 'no update field(s) sent', '_id': issueID }
-          logAndSendError('no update field(s) sent', res, error)
+          logAndSendError(error, res, error)
           return
         }
         updatePack.updated_on = Date.now()
@@ -101,7 +102,7 @@ module.exports = (app, myDataBase) => {
         let project = req.params.project;
         if (!req.body._id && !req.body.message) {
           const error = { error: 'missing _id' }
-          logAndSendError('error: missing _id', res, error)
+          logAndSendError(error, res, error)
           return
         }
         if(req.body.message == 'delete all') {
@@ -147,7 +148,7 @@ const deleteOne = async (project, req, res) => {
     const deleteFeedback = await Issue.deleteOne({ project, _id: req.body._id });
     if (deleteFeedback.deletedCount === 0) {
       const error = { error: 'could not delete', _id: req.body._id }
-      logAndSendError('error: issue with requested _id was not found', res,  error);
+      logAndSendError(error, res,  error);
     } else {
       console.log(' '.repeat(10) + 'successfull deleted'.bgGreen.white);
       const deleteResponse = {
@@ -159,9 +160,9 @@ const deleteOne = async (project, req, res) => {
   } catch (error) {
     const err = {error: 'could not delete', _id: req.body._id}
     if (!!error.message.match(/Cast to ObjectId/)) {
-      logAndSendError('error: issue with requested _id was not found', res, err)
+      logAndSendError(err, res, err)
     } else {
-      logAndSendError('unknown error: issue could not deleted', res, err);
+      logAndSendError(err, res, err);
     }
   };
 };
@@ -234,7 +235,7 @@ async function updateOne(req, updatePack, res) {
   } catch (error) {
     const err = { error: 'could not update', '_id': req.body._id }
     if (!!error.message.match(/Cast to ObjectId/)) {
-      logAndSendError(error.message, res, err)
+      logAndSendError(err, res, err)
     }else {
       logAndSendError('unknown error on update', res, err);
     }
