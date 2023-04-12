@@ -74,7 +74,8 @@ module.exports = (app, myDataBase) => {
       .put(async function (req, res){
         const timer = Date.now()
         let project = req.params.project;
-        const issueID = req.body._id
+        let issueID = ''
+        issueID = req.body._id
         const updatePack = createFilter(project, req)
 
         if (!issueID) {
