@@ -73,9 +73,8 @@ module.exports = (app, myDataBase) => {
 
       .put(async function (req, res){
         const timer = Date.now()
-        let project = req.params.project;
         const issueID = req.body._id
-        const updatePack = createFilter(project, req)
+        const updatePack = createFilter(req)
 
         if (!issueID) {
           const error = { error: 'missing _id' }
@@ -89,10 +88,9 @@ module.exports = (app, myDataBase) => {
           return
         }
         updatePack.updated_on = Date.now()
-
-
-
-        await updateOne(req, updatePack, res);
+        
+        updateByID(req, updatePack, res)
+        // await updateOne(req, updatePack, res);
         
       })
       
@@ -207,7 +205,7 @@ function createNewIssue(project, body) {
   });
 }
 
-function createFilter(project, req) {
+function createFilter(req) {
   const updatePack = {}
   if (getKeyLength(req.body) > 1) {
     for (const key in req.body) {
@@ -219,26 +217,10 @@ function createFilter(project, req) {
   return updatePack
 }
 
-
-async function updateOne(req, updatePack, res) {
-  try {
-    const updateFeedback = await Issue.findOneAndUpdate({ _id: req.body._id }, updatePack, { new: true });
-    if (updateFeedback) {
-      const updateResponse = {
-        result: 'successfully updated',
-        _id: updateFeedback.id
-      }
-      res.status(200).json(updateResponse);
-    } else {
-      logAndSendError('no match for update', res);
-    }
-  } catch (error) {
-    const err = { error: 'could not update', '_id': req.body._id }
-    if (!!error.message.match(/Cast to ObjectId/)) {
-      logAndSendError(err, res, err)
-    }else {
-      logAndSendError(err, res, err);
-    }
-  }
+function updateByID(req, updatePack, res) {
+  Issue.findByIdAndUpdate(req.body._id, updatePack, { new: true })
+    .then(  (result)  =>  {res.json({ result: 'successfully updated',  _id: result._id }) })
+    .catch( (err)     =>  {res.json({ error: 'could not update',       _id: req.body._id }) })
 }
+
 
