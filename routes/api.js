@@ -236,7 +236,7 @@ async function updateOne(issueID, updatePack, res) {
       logAndSendError('no match for update', res);
     }
   } catch (error) {
-    const err = { error: 'could not update', '_id': issueID}
+    const err = { error: 'could not update', '_id': issueID }
     if (!!error.message.match(/Cast to ObjectId/)) {
       logAndSendError(error.message, res, err)
     }else {
