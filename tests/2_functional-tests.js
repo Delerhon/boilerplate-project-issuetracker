@@ -245,7 +245,7 @@ suite("Functional Tests", function () {
         })          
         .end(async (err, res) => {
             assert.equal(res.status, 200);
-            assert.equal(res.body.error, 'no update field(s) sent' )
+            assert.deepEqual(res.body, { error: 'no update field(s) sent', _id: testID })
 
             done();
           });
@@ -257,13 +257,13 @@ suite("Functional Tests", function () {
       .request(server)
       .put(`/api/issues/apitest`)
       .send({
-        _id: 'eargae',
+        _id: '6436af60f49d2e179c60fa',
         issue_text: "doch nicht",
         created_by: 'not me'
       })
       .end(async (err, res) => {
         assert.equal(res.status, 200);
-        assert.equal(res.body.error, 'could not update')
+        assert.deepEqual(res.body, { error: 'could not update', _id: '6436af60f49d2e179c60fa' })
         done();
       });
   });
@@ -282,7 +282,7 @@ suite("Functional Tests", function () {
         })
         .end(async (err, res) => {
           assert.equal(res.status, 200);
-          assert.equal(res.body.result, 'successfully deleted')
+          assert.deepEqual(res.body, { result: 'successfully deleted', _id: getID })
           assert.equal(res.body._id, getID)
           done();
         });
@@ -294,12 +294,11 @@ suite("Functional Tests", function () {
       .request(server)
       .delete(`/api/issues/apitest`)
       .send({
-        _id: "198we1f",
+        _id: "6436af60f49d2e179c60fa",
       })
       .end(async (err, res) => {
         assert.equal(res.status, 200)
-        assert.equal(res.body.error, 'could not delete')
-        assert.equal(res.body._id, "198we1f")
+        assert.deepEqual(res.body, { error: 'could not delete', _id: '6436af60f49d2e179c60fa' })
         done();
       });
   });
@@ -312,7 +311,7 @@ suite("Functional Tests", function () {
       })
       .end((err, res) => {
         assert.equal(res.status, 200);
-        assert.equal(res.body.error, 'missing _id')
+        assert.deepEqual(res.body, { error: 'missing _id' })
         chai.request(server).delete('/api/issues/apitest').send({message: 'delete all'})
         .end((err, res) => {
           chai.request(server).delete('/api/issues/apitest2').send({message: 'delete all'})
